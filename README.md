@@ -58,7 +58,7 @@ plugins:
   - id: dev.mcpg.backend.llm.compat
     class: backend
     source:
-      oci: ghcr.io/mcpg-dev/source-code/plugins/backend-llm-compat:protocol-1
+      oci: ghcr.io/mcpg-dev/plugins/backend-llm-compat
 
 mcp:
   capabilities:
