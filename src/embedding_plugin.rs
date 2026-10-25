@@ -133,7 +133,7 @@ impl BackendPlugin for CompatEmbeddingPlugin {
                 message: format!("execute payload was not JSON: {e}"),
             })?
         };
-        let result = engine.execute(&args).await;
+        let result = engine.execute_with_usage(&args).await;
         metrics::counter!(
             "mcpg_embedding_calls_total",
             "binding" => backend_name.to_owned(),
@@ -142,14 +142,8 @@ impl BackendPlugin for CompatEmbeddingPlugin {
             "status" => if result.is_ok() { "ok" } else { "error" },
         )
         .increment(1);
-        let value = result?;
-        let payload = serde_json::to_vec(&value).map_err(|e| BackendError::Transport {
-            message: format!("serialize embedding response: {e}"),
-        })?;
-        Ok(BackendResponse {
-            payload,
-            truncated: false,
-        })
+        let (value, usage) = result?;
+        mcpg_backend_llm_shared::engine::response_with_usage(value, usage, &request.headers)
     }
 
     async fn execute_streaming(
